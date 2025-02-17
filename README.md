@@ -15,7 +15,7 @@ This project is a complete cybersecurity investigation & automation script that 
 
 ✅ Runs an automated Python script—because nobody wants to do this manually every time.
 
-🛠️ Quick Setup (For Any macOS User)
+## 🛠️ Quick Setup (For Any macOS User)
 
 You don’t need to be a hacker, engineer, or SOC analyst—just follow these simple steps:
 
