@@ -1,0 +1,76 @@
+import os
+import re
+import requests
+from collections import Counter
+
+# 🔍 Define the directory where logs are stored
+LOGS_DIR = "/Users/carlos/Desktop/Logs/"  # Update this if needed
+
+# 🔍 Function to extract external IPs from log files
+def extract_ips_from_logs():
+    ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+    external_ips = []
+
+    # Loop through all log files in the directory
+    for filename in os.listdir(LOGS_DIR):
+        if filename.endswith(".txt"):  # Only process .txt log files
+            file_path = os.path.join(LOGS_DIR, filename)
+            print(f"📂 Scanning: {filename}")
+            try:
+                with open(file_path, "r", errors="ignore") as file:
+                    for line in file:
+                        found_ips = re.findall(ip_pattern, line)
+                        for ip in found_ips:
+                            if not ip.startswith(("192.168", "10.", "127.", "0.")):  
+                                external_ips.append(ip)  # Store unique IPs
+            except Exception as e:
+                print(f"⚠️ Error reading {filename}: {e}")
+    
+    return external_ips
+
+# 🔍 Function to get WHOIS information
+def get_whois(ip):
+    try:
+        response = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return f"{ip} - {data.get('country', 'Unknown')} - {data.get('isp', 'Unknown')}"
+        else:
+            return f"{ip} - WHOIS Lookup Failed (Status {response.status_code})"
+    except requests.RequestException:
+        return f"{ip} - WHOIS Lookup Timed Out"
+
+# 🔍 Function to analyze logs and save results
+def analyze_logs():
+    print("\n🔍 Scanning logs for external IPs...\n")
+    external_ips = extract_ips_from_logs()
+
+    if not external_ips:
+        print("✅ No external IPs found in logs.\n")
+        return
+
+    # Count occurrences of each IP
+    ip_counts = Counter(external_ips)
+
+    # Save results to a log file
+    log_file = os.path.join(LOGS_DIR, "log_analysis_results.txt")
+    with open(log_file, "w") as f:
+        f.write("\n🔍 Log Analysis Report\n\n")
+        f.write("🌍 External IPs Found:\n")
+        for ip, count in ip_counts.most_common(10):
+            f.write(f"{ip} - Seen {count} times\n")
+
+        f.write("\n🌍 WHOIS Lookups:\n")
+        whois_lookups = 5  # Limit WHOIS lookups to prevent crashes
+        for ip in set(external_ips[:whois_lookups]):
+            whois_info = get_whois(ip)
+            f.write(whois_info + "\n")
+            print(whois_info)  # Print results live
+
+    print(f"\n✅ Analysis complete! Results saved to: {log_file}\n")
+
+# Run the log analysis
+if __name__ == "__main__":
+    analyze_logs()
+
+
