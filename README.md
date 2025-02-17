@@ -89,7 +89,8 @@ python3 log_analyzer.py
 ## 😂 Bonus: Cybersecurity Humor
 
 “sudo chmod -R 777 /” – because who needs security, right?”
-(Don’t actually run this. Unless you want a bad day.)
+
+# (Don’t actually run this. Unless you want a bad day.)
 
 
 ## 🔥 Final Thoughts
